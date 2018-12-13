@@ -1,15 +1,15 @@
 export const AVAILABLE_PAYMENT_MEANS = [{
   value: 'bankAccount',
-  canBeAdded: true,
+  registerable: true,
 }, {
   value: 'paypal',
-  canBeAdded: true,
+  registerable: true,
 }, {
   value: 'creditCard',
-  canBeAdded: true,
+  registerable: true,
 }, {
   value: 'deferredPaymentAccount',
-  canBeAdded: false,
+  registerable: false,
 }];
 
 export const DEFAULT_OPTIONS = {

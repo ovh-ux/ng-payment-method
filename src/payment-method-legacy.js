@@ -69,6 +69,14 @@ export default class OvhPaymentMethodLegacy {
     return this.deleteUSPaymentMethod(legacyPaymentMethod);
   }
 
+  getAvailablePaymentMethodTypes() {
+    if (this.target !== 'US') {
+      return this.getAvailablePaymentMeanTypes();
+    }
+
+    return this.getAvailableUSPaymentMethodTypes();
+  }
+
   /* =====================================
   =            Payment Means            =
   ===================================== */
@@ -164,7 +172,7 @@ export default class OvhPaymentMethodLegacy {
     return this.getPaymentMeanResource(paymentMean.paymentType)
       .chooseAsDefaultPaymentMean({
         id: paymentMean.id,
-      }).$promise;
+      }, {}).$promise;
   }
 
   /**
@@ -177,6 +185,13 @@ export default class OvhPaymentMethodLegacy {
       .delete({
         id: paymentMean.id,
       }).$promise;
+  }
+
+  getAvailablePaymentMeanTypes() {
+    return this.$q.when(_.chain(AVAILABLE_PAYMENT_MEANS)
+      .filter({ registerable: true })
+      .map(this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this))
+      .value());
   }
 
   /* =====  End of Payment Means  ====== */
@@ -233,6 +248,13 @@ export default class OvhPaymentMethodLegacy {
     }).$promise;
   }
 
+  getAvailableUSPaymentMethodTypes() {
+    return this.$q([{
+      value: 'CREDIT_CARD',
+      registerable: true,
+    }]).then(paymentTypes => _.map(paymentTypes, this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this)));
+  }
+
   /*= ====  End of US Payment Methods  ====== */
 
 
@@ -240,19 +262,27 @@ export default class OvhPaymentMethodLegacy {
    =            Transform Methods            =
    ========================================= */
 
+  getFullPaymentType(paymentType) {
+    return {
+      value: _.snakeCase(paymentType).toUpperCase(),
+      text: this.$translate.instant(`ovh_payment_type_${_.snakeCase(paymentType)}`),
+    };
+  }
+
+  getFullPaymentStatus(paymentStatus, paymentType) {
+    return {
+      value: _.snakeCase(paymentStatus).toUpperCase(),
+      text: paymentType === 'bankAccount' && paymentStatus === 'pendingValidation'
+        ? this.$translate.instant('ovh_payment_status_waiting_for_documents')
+        : this.$translate.instant(`ovh_payment_status_${_.snakeCase(paymentStatus)}`),
+    };
+  }
+
   /**
    *  Transform payment mean to payment method.
    *  The goal is to have a coherent object structure between api calls
    *  (/me/payment/method and /me/paymentMean/*)
    */
-  transformToPaymentMethod(paymentMethod) {
-    if (this.target !== 'US') {
-      return this.transformPaymentMeanToPaymentMethod(paymentMethod);
-    }
-
-    return this.transformUSPaymentMethodToPaymentMethod(paymentMethod);
-  }
-
   transformUSPaymentMethodToPaymentMethod(usPaymentMethod) {
     const paymentType = _.get(usPaymentMethod, 'paymentType', null);
     const paymentStatus = _.get(usPaymentMethod, 'status', null);
@@ -263,17 +293,11 @@ export default class OvhPaymentMethodLegacy {
         name: null,
         data: null,
       },
-      status: {
-        value: paymentStatus,
-        text: this.$translate.instant(`ovh_payment_status_${_.snakeCase(paymentStatus)}`),
-      },
+      status: this.getFullPaymentStatus(paymentStatus, paymentType),
       paymentMethodId: usPaymentMethod.id,
       default: _.get(usPaymentMethod, 'default', false),
       description: _.get(usPaymentMethod, 'description', null),
-      paymentType: {
-        value: paymentType,
-        text: this.$translate.instant(`ovh_payment_type_${_.snakeCase(paymentType)}`),
-      },
+      paymentType: this.getFullPaymentType(paymentType),
       billingContactId: _.get(usPaymentMethod, 'billingContactId', null),
       creationDate: _.get(usPaymentMethod, 'creationDate', null),
       lastUpdate: null,
@@ -292,24 +316,29 @@ export default class OvhPaymentMethodLegacy {
         name: null,
         data: null,
       },
-      status: {
-        value: paymentStatus,
-        text: paymentType === 'bankAccount' && paymentStatus === 'pendingValidation'
-          ? this.$translate.instant('ovh_payment_status_waiting_for_documents')
-          : this.$translate.instant(`ovh_payment_status_${_.snakeCase(paymentStatus)}`),
-      },
+      status: this.getFullPaymentStatus(paymentStatus, paymentType),
       paymentMethodId: paymentMean.id,
       default: _.get(paymentMean, 'defaultPaymentMean', false),
       description: _.get(paymentMean, 'description', null),
-      paymentType: {
-        value: paymentType,
-        text: this.$translate.instant(`ovh_payment_type_${_.snakeCase(paymentType)}`),
-      },
+      paymentType: this.getFullPaymentType(paymentType),
       billingContactId: null,
       creationDate: _.get(paymentMean, 'creationDate', null),
       lastUpdate: null,
       label: paymentMean.label || paymentMean.number || paymentMean.iban || null,
       original: paymentMean,
+    };
+  }
+
+  transformLegacyPaymentMethodTypeToPaymentMethodType(legacyPaymentMehtod) {
+    return {
+      oneshot: true,
+      icon: {
+        name: null,
+        data: null,
+      },
+      registerable: legacyPaymentMehtod.registerable,
+      paymentType: this.getFullPaymentType(legacyPaymentMehtod.value),
+      original: legacyPaymentMehtod,
     };
   }
 

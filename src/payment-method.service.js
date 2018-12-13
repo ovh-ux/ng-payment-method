@@ -26,9 +26,8 @@ export default class OvhPaymentMethodService {
   getLegacyPaymentTypes() {
     if (this.target !== 'US') {
       return this.$q.when(_.chain(AVAILABLE_PAYMENT_MEANS)
-        .filter({ canBeAdded: true })
-        .map('value')
-        .map(value => _.snakeCase(value).toUpperCase())
+        .filter({ registerable: true })
+        .map(paymentMethodType => _.snakeCase(paymentMethodType.value).toUpperCase())
         .value());
     }
 
@@ -59,12 +58,17 @@ export default class OvhPaymentMethodService {
 
   /* ----------  Payment types  ---------- */
 
-  getAvailablePaymentTypes() {
+  getAvailablePaymentMethodTypes() {
     return this.$q.all({
-      legacyTypes: this.getLegacyPaymentTypes(),
-      paymentMethodTypes: this.OvhApiMe.Payment().Method().v6().availableMethods().$promise,
+      legacyTypes: this.ovhPaymentMethodLegacy.getAvailablePaymentMethodTypes(),
+      // paymentMethodTypes: this.OvhApiMe.Payment().Method().v6().availableMethods().$promise,
+      paymentMethodTypes: this.$q.when([]),
     }).then(({ legacyTypes, paymentMethodTypes }) => {
-      console.log(legacyTypes, paymentMethodTypes);
+      _.remove(legacyTypes, ({ paymentType }) => _.some(paymentMethodTypes, {
+        paymentType: paymentType.value,
+      }));
+
+      return [].concat(legacyTypes, paymentMethodTypes);
     });
 
     // const paymentTypes = this.target !== 'US' ? AVAILABLE_PAYMENT_MEANS : [];
