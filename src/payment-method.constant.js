@@ -12,6 +12,12 @@ export const AVAILABLE_PAYMENT_MEANS = [{
   canBeAdded: false,
 }];
 
+export const DEFAULT_OPTIONS = {
+  onlyValid: false,
+  transform: false, // transform legacy payment methods to payment methods
+};
+
 export default {
   AVAILABLE_PAYMENT_MEANS,
+  DEFAULT_OPTIONS,
 };
