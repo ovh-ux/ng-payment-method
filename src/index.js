@@ -5,8 +5,10 @@ import 'ovh-api-services';
 
 import paymentMethodProvider from './payment-method.provider';
 
-const ovhAngularPaymentMethod = angular
-  .module('ovh-angular-payment-method', [
+const moduleName = 'ovh-angular-payment-method';
+
+angular
+  .module(moduleName, [
     'ovh-api-services',
     ngTranslate,
   ])
@@ -14,4 +16,4 @@ const ovhAngularPaymentMethod = angular
   .provider('ovhPaymentMethod', paymentMethodProvider)
   .name;
 
-export default ovhAngularPaymentMethod;
+export default moduleName;
