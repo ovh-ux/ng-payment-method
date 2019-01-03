@@ -5,6 +5,11 @@ import { IBAN_BIC_RULES } from './payment-method.constant';
 export default class OvhPaymentMethodHelperService {
   /* @ngInject */
 
+  constructor() {
+    this.isValidIban = OvhPaymentMethodHelperService.isValidIban;
+    this.isValidBic = OvhPaymentMethodHelperService.isValidBic;
+  }
+
   static isValidIban(ibanParam) {
     let iban = ibanParam;
 
