@@ -94,10 +94,10 @@ export default class OvhPaymentMethodService {
   /**
    *  Add an new payment method
    */
-  addPaymentMethod(paymentMehtodType, params = {}) {
-    if (paymentMehtodType.original) {
+  addPaymentMethod(paymentMethodType, params = {}) {
+    if (paymentMethodType.original) {
       return this.ovhPaymentMethodLegacy
-        .addPaymentMethod(paymentMehtodType.original.value, params);
+        .addPaymentMethod(paymentMethodType.original.value, params);
     }
 
     return this.OvhApiMe.Payment().Method().v6().save().$promise;
