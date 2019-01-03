@@ -1,14 +1,15 @@
-import _ from 'lodash';
-
 import {
   AVAILABLE_PAYMENT_MEANS,
   DEFAULT_OPTIONS,
 } from './payment-method.constant';
 
 export default class OvhPaymentMethodLegacy {
-  constructor($q, $translate, OvhApiMe, target) {
+  /* @ngInject */
+
+  constructor($q, $translate, $window, OvhApiMe, target) {
     this.$q = $q;
     this.$translate = $translate;
+    this.$window = $window;
     this.OvhApiMe = OvhApiMe;
     this.target = target;
   }
@@ -26,6 +27,19 @@ export default class OvhPaymentMethodLegacy {
       return this.getPaymentMeans(options);
     }
     return this.getUSPaymentMethods(options);
+  }
+
+  /**
+   *  [addPaymentMethod description]
+   *  @param {[type]} paymentMethodType   [description]
+   *  @param {[type]} paymentMethodParams [description]
+   */
+  addPaymentMethod(paymentMethodType, paymentMethodParams = {}) {
+    if (this.target !== 'US') {
+      return this.addPaymentMean(paymentMethodType, paymentMethodParams);
+    }
+
+    return this.$q.when('TODO');
   }
 
   /**
@@ -70,11 +84,12 @@ export default class OvhPaymentMethodLegacy {
   }
 
   getAvailablePaymentMethodTypes() {
-    if (this.target !== 'US') {
-      return this.getAvailablePaymentMeanTypes();
-    }
+    const availablePaymentMeans = _.get(AVAILABLE_PAYMENT_MEANS, this.target);
 
-    return this.getAvailableUSPaymentMethodTypes();
+    return this.$q.when(_.chain(availablePaymentMeans)
+      .filter({ registerable: true })
+      .map(this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this))
+      .value());
   }
 
   /* =====================================
@@ -107,9 +122,11 @@ export default class OvhPaymentMethodLegacy {
       });
     }
 
+    const availablePaymentMeans = _.get(AVAILABLE_PAYMENT_MEANS, this.target);
+
     return this.$q
       .all(_.map(
-        AVAILABLE_PAYMENT_MEANS,
+        availablePaymentMeans,
         type => this.getPaymentMeansOfType(type.value, options),
       ))
       .then(paymentsOfType => _.flatten(paymentsOfType));
@@ -151,6 +168,25 @@ export default class OvhPaymentMethodLegacy {
       )));
   }
 
+  addPaymentMean(paymentMeanType, params = {}) {
+    const addParams = params;
+
+    if (_.has(addParams, 'default')) {
+      addParams.setDefault = addParams.default;
+      delete addParams.default;
+    }
+
+    return this.getPaymentMeanResource(paymentMeanType)
+      .save({}, addParams)
+      .$promise.then((result) => {
+        if (result.url && paymentMeanType !== 'bankAccount') {
+          this.$window.open(result.url, '_blank');
+        }
+
+        return result;
+      });
+  }
+
   /**
    *  Edit the given payment mean.
    *  @param  {Object} paymentMean The payment mean to edit
@@ -185,13 +221,6 @@ export default class OvhPaymentMethodLegacy {
       .delete({
         id: paymentMean.id,
       }).$promise;
-  }
-
-  getAvailablePaymentMeanTypes() {
-    return this.$q.when(_.chain(AVAILABLE_PAYMENT_MEANS)
-      .filter({ registerable: true })
-      .map(this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this))
-      .value());
   }
 
   /* =====  End of Payment Means  ====== */
@@ -246,13 +275,6 @@ export default class OvhPaymentMethodLegacy {
     return this.OvhApiMe.PaymentMethod().v6().delete({
       id: usPaymentMethod.id,
     }).$promise;
-  }
-
-  getAvailableUSPaymentMethodTypes() {
-    return this.$q([{
-      value: 'CREDIT_CARD',
-      registerable: true,
-    }]).then(paymentTypes => _.map(paymentTypes, this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this)));
   }
 
   /*= ====  End of US Payment Methods  ====== */

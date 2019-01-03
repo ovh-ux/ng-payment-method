@@ -1,7 +1,4 @@
-import _ from 'lodash';
-
 import {
-  AVAILABLE_PAYMENT_MEANS,
   DEFAULT_OPTIONS,
 } from './payment-method.constant';
 
@@ -10,29 +7,21 @@ import OvhPaymentMethodLegacy from './payment-method-legacy';
 export default class OvhPaymentMethodService {
   /* @ngInject */
 
-  constructor($q, $translate, OvhApiMe, target) {
+  constructor($q, $translate, $window, OvhApiMe, target) {
     this.$q = $q;
     this.$translate = $translate;
+    this.$window = $window;
     this.OvhApiMe = OvhApiMe;
     this.target = target;
 
-    this.ovhPaymentMethodLegacy = new OvhPaymentMethodLegacy($q, $translate, OvhApiMe, target);
+    this.ovhPaymentMethodLegacy = new OvhPaymentMethodLegacy(
+      $q, $translate, $window, OvhApiMe, target,
+    );
   }
 
   /* =============================================
   =            LEGACY PAYMENT METHODS            =
   ============================================== */
-
-  getLegacyPaymentTypes() {
-    if (this.target !== 'US') {
-      return this.$q.when(_.chain(AVAILABLE_PAYMENT_MEANS)
-        .filter({ registerable: true })
-        .map(paymentMethodType => _.snakeCase(paymentMethodType.value).toUpperCase())
-        .value());
-    }
-
-    return this.$q.when(['CREDIT_CARD']);
-  }
 
   /**
    *  Check if connected user has a default payment method
@@ -59,31 +48,58 @@ export default class OvhPaymentMethodService {
   /* ----------  Payment types  ---------- */
 
   getAvailablePaymentMethodTypes() {
+    return this.OvhApiMe.Payment().Method().v6().availableMethods().$promise
+      .then((paymentTypes) => {
+        const registerablePaymentTypes = _.filter(paymentTypes, {
+          registerable: true,
+        });
+
+        return _.map(registerablePaymentTypes, (paymentTypeParam) => {
+          const paymentType = paymentTypeParam;
+          paymentType.paymentType = {
+            value: paymentType.paymentType,
+            text: this.$translate.instant(`ovh_payment_type_${_.snakeCase(paymentType.paymentType)}`),
+          };
+          return paymentType;
+        });
+      })
+      .catch(error => (error.status === 404 ? [] : this.$q.reject(error)));
+  }
+
+  /**
+   *  Get all the available payment method types
+   *  @return {Promise} That returns a list of available payment method types
+   */
+  getAllAvailablePaymentMethodTypes() {
     return this.$q.all({
       legacyTypes: this.ovhPaymentMethodLegacy.getAvailablePaymentMethodTypes(),
-      // paymentMethodTypes: this.OvhApiMe.Payment().Method().v6().availableMethods().$promise,
-      paymentMethodTypes: this.$q.when([]),
+      paymentMethodTypes: this.getAvailablePaymentMethodTypes(),
     }).then(({ legacyTypes, paymentMethodTypes }) => {
-      _.remove(legacyTypes, ({ paymentType }) => _.some(paymentMethodTypes, {
-        paymentType: paymentType.value,
-      }));
+      _.remove(legacyTypes, ({ paymentType }) => {
+        const hasIdentical = _.some(paymentMethodTypes, (paymentMethodType) => {
+          const isSameValue = paymentMethodType.paymentType.value === paymentType.value;
+          return isSameValue;
+        });
+        return hasIdentical;
+      });
 
       return [].concat(legacyTypes, paymentMethodTypes);
     });
-
-    // const paymentTypes = this.target !== 'US' ? AVAILABLE_PAYMENT_MEANS : [];
-
-    // if (!translated) {
-    //   return paymentTypes;
-    // }
-
-    // return _.map(paymentTypes, paymentType => ({
-    //   value: paymentType,
-    //   text: this.$translate.instant(`ovh_payment_type_${_.snakeCase(paymentType)}`),
-    // }));
   }
 
   /* ----------  Action on paymentMethod  ---------- */
+
+  /**
+   *  Add an new payment method
+   */
+  addPaymentMethod(paymentMehtodType, params = {}) {
+    if (paymentMehtodType.original) {
+      return this.ovhPaymentMethodLegacy
+        .addPaymentMethod(paymentMehtodType.original.value, params);
+    }
+
+    return this.OvhApiMe.Payment().Method().v6().save().$promise;
+  }
 
   /**
    *  Edit given payment method
@@ -170,7 +186,8 @@ export default class OvhPaymentMethodService {
             };
 
             return paymentMethod;
-          }))));
+          }))))
+      .catch(error => (error.status === 404 ? [] : this.$q.reject(error)));
   }
 
   /**
@@ -186,8 +203,7 @@ export default class OvhPaymentMethodService {
   getAllPaymentMethods(options = DEFAULT_OPTIONS) {
     return this.$q.all({
       legacies: this.ovhPaymentMethodLegacy.getPaymentMethods(options),
-      // paymentMethods: this.getPaymentMethods(),
-      paymentMethods: this.$q.when([]),
+      paymentMethods: this.getPaymentMethods(),
     }).then(({ legacies, paymentMethods }) => {
       _.remove(legacies, ({ paymentMethodId }) => _.some(paymentMethods, {
         paymentMeanId: paymentMethodId,
