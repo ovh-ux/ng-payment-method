@@ -1,3 +1,5 @@
+import angular from 'angular';
+
 import OvhPaymentMehtodService from './payment-method.service';
 
 export default class OvhPaymentMethodProvider {

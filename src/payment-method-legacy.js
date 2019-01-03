@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import {
   AVAILABLE_PAYMENT_MEANS,
   DEFAULT_OPTIONS,

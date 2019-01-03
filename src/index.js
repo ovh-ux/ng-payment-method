@@ -1,3 +1,4 @@
+import angular from 'angular';
 import ngTranslate from 'angular-translate';
 
 import 'ovh-api-services';

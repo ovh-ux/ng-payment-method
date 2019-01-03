@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import { IBAN_BIC_RULES } from './payment-method.constant';
 
 export default class OvhPaymentMethodHelperService {
@@ -26,7 +28,7 @@ export default class OvhPaymentMethodHelperService {
       remaining: ibanTab[3],
     };
 
-    if (!countryBaseRegExp.hasOwnProperty(ibanHash.country)) {
+    if (!Object.prototype.hasOwnProperty.call(countryBaseRegExp, ibanHash.country)) {
       return false;
     }
 
@@ -66,7 +68,7 @@ export default class OvhPaymentMethodHelperService {
     return previousModulo === 1;
   }
 
-  isValidBic(bicParam) {
+  static isValidBic(bicParam) {
     let bic = bicParam;
 
     const bicRegExp = new RegExp(IBAN_BIC_RULES.BIC_REGEXP);

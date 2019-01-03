@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import {
   DEFAULT_OPTIONS,
 } from './payment-method.constant';
