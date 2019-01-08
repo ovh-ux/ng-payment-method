@@ -18,6 +18,8 @@ export default class OvhPaymentMethodProvider {
   }
 
   $get($q, $translate, $window, OvhApiMe) {
-    return new OvhPaymentMethodService($q, $translate, $window, OvhApiMe, this.target);
+    return new OvhPaymentMethodService(
+      $q, $translate, $window, OvhApiMe, this.target,
+    );
   }
 }
