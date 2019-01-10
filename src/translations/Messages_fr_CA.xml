@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <translations>
    <translation id="ovh_payment_type_bank_account" qtlid="176911">Compte bancaire</translation>
-   <translation id="ovh_payment_type_paypal" qtlid="98228">Paypal</translation>
+   <translation id="ovh_payment_type_paypal" qtlid="98228">PayPal</translation>
    <translation id="ovh_payment_type_credit_card" qtlid="89809">Carte bancaire</translation>
    <translation id="ovh_payment_type_deferred_payment_account" qtlid="406931">Compte de paiement différé</translation>
    <translation id="ovh_payment_type_internal_trusted_account" qtlid="406931">Compte de paiement différé</translation>
