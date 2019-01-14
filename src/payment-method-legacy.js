@@ -370,7 +370,7 @@ export default class OvhPaymentMethodLegacy {
       billingContactId: null,
       creationDate: _.get(paymentMean, 'creationDate', null),
       lastUpdate: null,
-      label: paymentLabel || null,
+      label: paymentLabel,
       original: paymentMean,
     };
   }
