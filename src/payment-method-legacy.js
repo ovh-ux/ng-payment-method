@@ -371,6 +371,7 @@ export default class OvhPaymentMethodLegacy {
       creationDate: _.get(paymentMean, 'creationDate', null),
       lastUpdate: null,
       label: paymentLabel,
+      expirationDate: _.get(paymentMean, 'expirationDate', null),
       original: paymentMean,
     };
   }
