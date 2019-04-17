@@ -214,7 +214,11 @@ export default class OvhPaymentMethodLegacy {
       .save({}, addParams)
       .$promise.then((result) => {
         if (result.url && paymentMeanType !== 'bankAccount') {
-          this.$window.open(result.url, '_blank');
+          if (!params.returnUrl) {
+            this.$window.open(result.url, '_blank');
+          } else {
+            this.$window.location = result.url;
+          }
         }
 
         return result;
