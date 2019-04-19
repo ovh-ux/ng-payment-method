@@ -11,7 +11,7 @@ import {
 export default class OvhPaymentMethodAvailableTypesCtrl {
   /* @ngInject */
   constructor(ovhPaymentMethod) {
-    // dependencies injectsion
+    // dependencies injection
     this.ovhPaymentMethod = ovhPaymentMethod;
 
     // other attributes in view
