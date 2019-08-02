@@ -7,7 +7,9 @@
     "import/no-unresolved": 0
   },
   "globals": {
-    "EprotectIframeClient": true,
-    "document": true
+    "EprotectIframeClient": true
+  },
+  "env": {
+    "browser": true
   }
 }
