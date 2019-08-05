@@ -140,7 +140,7 @@ export default class OvhPaymentMethodService {
         return this.$q.when(response);
       })
       .then((response) => {
-        if (response.url) {
+        if (paymentMethodType.integration === TYPE_INTEGRATION_ENUM.REDIRECT && response.url) {
           this.$window.location = response.url;
         }
         return response;
