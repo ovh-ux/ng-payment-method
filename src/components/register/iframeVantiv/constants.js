@@ -13,7 +13,7 @@ export const THREAT_METRIC = {
 export const VANTIV_IFRAME_CONFIGURATION = {
   paypageId: 'ThwL3YY9YEnWXTFb',
   style: 'ovhcss',
-  height: '300px',
+  height: '75px',
   reportGroup: 'ovh.us',
   timeout: 15000,
   div: 'eProtectIframe',
