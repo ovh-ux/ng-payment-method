@@ -10,7 +10,7 @@ export default class IframeVantivInstance extends RegisterInstance {
     this.eProtectClient = null;
   }
 
-  instanciate(instanciationConfiguration = {}) {
+  instanciate() {
     if (typeof EprotectIframeClient === 'undefined') {
       throw new Error("Could not download the vantiv's eProtect javascript library.");
     }
@@ -19,7 +19,6 @@ export default class IframeVantivInstance extends RegisterInstance {
       {},
       VANTIV_IFRAME_CONFIGURATION,
       this.configuration,
-      instanciationConfiguration,
     ));
 
     super.instanciate();
