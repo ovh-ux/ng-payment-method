@@ -8,6 +8,7 @@ export default class IframeVantivInstance extends RegisterInstance {
     super(instanceConfiguration);
 
     this.eProtectClient = null;
+    this.onBeforeSubmit = instanceConfiguration.onBeforeSubmit;
   }
 
   instanciate(instanciationConfiguration = {}) {
@@ -26,11 +27,17 @@ export default class IframeVantivInstance extends RegisterInstance {
   }
 
   submit(paymentMethod) {
-    // ask to Vantiv if the informations provided in its iFrame are correct
-    this.eProtectClient.getPaypageRegistrationId({
-      id: `PM${paymentMethod.paymentMethodId}`,
-    });
+    // call onBeforeSubmit to insert ThreatMetric
+    const t = this.onBeforeSubmit(paymentMethod)
+      .then(() => {
+        // ask to Vantiv if the informations provided in its iFrame are correct
+        this.eProtectClient.getPaypageRegistrationId({
+          id: `PM${paymentMethod.paymentMethodId}`,
+        });
 
-    return super.submit(paymentMethod);
+        return super.submit(paymentMethod);
+      });
+    console.log(t);
+    return t;
   }
 }
