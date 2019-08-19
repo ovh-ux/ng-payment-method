@@ -306,7 +306,7 @@ export default class OvhPaymentMethodLegacy {
     return this.$q.reject({
       status: 404,
       data: {
-        message: 'POST /me/paymentMehtod is no longer available.',
+        message: 'POST /me/paymentMethod is no longer available.',
       },
     });
   }
@@ -321,7 +321,7 @@ export default class OvhPaymentMethodLegacy {
     return this.$q.reject({
       status: 404,
       data: {
-        message: 'PUT /me/paymentMehtod/{paymentMethodId} is no longer available.',
+        message: 'PUT /me/paymentMethod/{paymentMethodId} is no longer available.',
       },
     });
   }
@@ -336,7 +336,7 @@ export default class OvhPaymentMethodLegacy {
     return this.$q.reject({
       status: 404,
       data: {
-        message: 'DELETE /me/paymentMehtod/{paymentMethodId} is no longer available.',
+        message: 'DELETE /me/paymentMethod/{paymentMethodId} is no longer available.',
       },
     });
   }
