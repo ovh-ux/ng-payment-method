@@ -3,7 +3,7 @@ import iframeVantiv from './iframeVantiv';
 
 import component from './component';
 
-const moduleName = 'ngOvhPaymentMehtodRegister';
+const moduleName = 'ngOvhPaymentMethodRegister';
 
 angular
   .module(moduleName, [

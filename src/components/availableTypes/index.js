@@ -5,7 +5,7 @@ import component from './availableTypes.component';
 // import styles
 import './index.scss';
 
-const moduleName = 'ngOvhPaymentMehtodAvailableTypes';
+const moduleName = 'ngOvhPaymentMethodAvailableTypes';
 
 angular
   .module(moduleName, [])
