@@ -21,10 +21,12 @@ export default {
   bindToController: true,
   template: `<div id="${VANTIV_IFRAME_CONFIGURATION.div}"></div>`,
   link: (scope, iElement, iAttributes, iControllers) => {
+    const { vantivIframeCtrl } = iControllers;
+
     /**
      *  Insert a script with given attributes
      */
-    const insertElement = (tagName, attributes = {}, onLoad = () => {}, styles = {}) => {
+    const insertElement = (tagName, attributes = {}, events = {}, styles = {}, options = {}) => {
       const element = document.createElement(tagName);
 
       // set attributes of dom element
@@ -37,39 +39,53 @@ export default {
         set(element.style, key, get(styles, key));
       });
 
-      // define onload callback
-      element.onload = onLoad;
+      // set events of dom element
+      Object.keys(events).forEach((key) => {
+        set(element, key, get(events, key));
+      });
 
-      document.body.appendChild(element);
-      console.log(element.attachEvent);
+      if (options.appendTo) {
+        options.appendTo.appendChild(element);
+      } else {
+        document.body.appendChild(element);
+      }
+
       return element;
     };
 
     // declare insertThreatMetric method that will load the script and iframe
     // that will handle Vantiv ThreatMetric mechanism
-    iControllers.vantivIframeCtrl.insertThreatMetric = paymentMehtod => new Promise((resolve, reject) => {
-      const threatMetricParams = `?org_id=OVHCLOUD&session_id=${new Date().getTime()}&pageid=${THREAT_METRIC.PAGE_ID}`;
+    vantivIframeCtrl.insertThreatMetric = ({
+      formSessionId,
+      organizationId,
+    }) => new Promise((resolve) => {
+      const threatMetricParams = `?org_id=${organizationId}&session_id=${formSessionId}&pageid=${THREAT_METRIC.PAGE_ID}`;
 
-      const onScriptLoaded = () =>
-      // when script is loaded - add the invisble iframe
-        insertElement('iframe', {
-          id: THREAT_METRIC.IFRAME.id,
-          src: `${THREAT_METRIC.IFRAME.src}${threatMetricParams}`,
-        }, () => {
-          console.log('iframe loaded ?');
-          return resolve();
-        }, {
-          with: '100px',
-          height: '100px',
-          border: '0',
-          position: 'absolute',
-          top: '-5000px',
-        });
+      // insert ThreatMetric script
       insertElement('script', {
         src: `${THREAT_METRIC.SCRIPT.src}${threatMetricParams}`,
-        id: THREAT_METRIC.SCRIPT.id,
+        id: `${THREAT_METRIC.SCRIPT.id}_${new Date().getTime()}`,
         type: 'text/javascript',
-      }, onScriptLoaded);
+      }, {
+        onload: () => {
+          // when script is loaded - add the invisble iframe of ThreatMetric into noscript tag
+          const noScriptTag = insertElement('noscript');
+          insertElement('iframe', {
+            id: THREAT_METRIC.IFRAME.id,
+            src: `${THREAT_METRIC.IFRAME.src}${threatMetricParams}`,
+          }, {
+            onload: () => resolve(),
+          }, {
+            with: '100px',
+            height: '100px',
+            border: '0',
+            position: 'absolute',
+            top: '-5000px',
+          }, {
+            appendTo: noScriptTag,
+          });
+        },
+      });
     });
 
     // add vantiv script to document body
@@ -78,7 +94,9 @@ export default {
       insertElement('script', {
         src: VANTIV_SCRIPT.src,
         id: VANTIV_SCRIPT.id,
-      }, iControllers.vantivIframeCtrl.init.bind(iControllers.vantivIframeCtrl));
+      }, {
+        onload: iControllers.vantivIframeCtrl.init.bind(iControllers.vantivIframeCtrl),
+      });
     } else {
       iControllers.vantivIframeCtrl.init();
     }
