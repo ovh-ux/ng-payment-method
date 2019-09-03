@@ -7,10 +7,17 @@ import merge from 'lodash/merge';
 import snakeCase from 'lodash/snakeCase';
 import startCase from 'lodash/startCase';
 
+import { DEFAULT_OPTIONS } from '../payment-method.constants';
 import {
   AVAILABLE_PAYMENT_MEANS,
-  DEFAULT_OPTIONS,
-} from './payment-method.constant';
+  PAYMENT_MEAN_TYPE_ENUM,
+} from './mean/payment-mean.constants';
+
+// legacies payment means classes
+import OvhPaymentMeanBankAccount from './mean/payment-mean-bank-account.class';
+import OvhPaymentMeanCreditCard from './mean/payment-mean-credit-card.class';
+import OvhPaymentMeanDeferredPaymentAccount from './mean/payment-mean-deferred-payment-account.class';
+import OvhPaymentMeanPaypal from './mean/payment-mean-paypal.class';
 
 export default class OvhPaymentMethodLegacy {
   /* @ngInject */
@@ -21,21 +28,6 @@ export default class OvhPaymentMethodLegacy {
     this.$window = $window;
     this.OvhApiMe = OvhApiMe;
     this.target = target;
-  }
-
-  /**
-   *  Use the legacy APIs to get payment methods:
-   *  - /me/paymentMean/* routes for EU and CA
-   *  - /me/paymentMethod route for US
-   *
-   *  @param  {Object} options Options for fetching payment methods
-   *  @return {Promise}        That returns an array of payment means (EU/CA) or methods (US)
-   */
-  getPaymentMethods(options = DEFAULT_OPTIONS) {
-    if (this.target !== 'US') {
-      return this.getPaymentMeans(options);
-    }
-    return this.$q.when([]);
   }
 
   /**
@@ -54,31 +46,23 @@ export default class OvhPaymentMethodLegacy {
   }
 
   /**
+   *  @deprecated - use editPaymentMean method instead
    *  Edit a legacy payment method
    *  @param  {Object} legacyPaymentMethod The legacy payment mean or US payment method to edit
    *  @return {Promise}
    */
   editPaymentMethod(legacyPaymentMethod, params) {
-    if (this.target !== 'US') {
-      return this.editPaymentMean(legacyPaymentMethod, params);
-    }
-
-    return this.editUSPaymentMethod(legacyPaymentMethod, params);
+    return this.editPaymentMean(legacyPaymentMethod, params);
   }
 
   /**
+   *  @deprecated - use setPaymentMeanAsDefault method instead
    *  Set a legacy payment method as default. Check the target to call the right API.
    *  @param  {Object} legacyPaymentMethod The legacy payment method to set as default
    *  @return {Promise}
    */
   setPaymentMethodAsDefault(legacyPaymentMethod) {
-    if (this.target !== 'US') {
-      return this.setPaymentMeanAsDefault(legacyPaymentMethod);
-    }
-
-    return this.editUSPaymentMethod(legacyPaymentMethod, {
-      default: true,
-    });
+    return this.setPaymentMeanAsDefault(legacyPaymentMethod);
   }
 
   /**
@@ -98,16 +82,13 @@ export default class OvhPaymentMethodLegacy {
   }
 
   /**
+   *  @deprecated - use deletePaymentMean method instead
    *  Delete a legacy payment method. Check the target to call the right API.
    *  @param  {Object} legacyPaymentMethod The legacy payment method to delete
    *  @return {Promise}
    */
   deletePaymentMethod(legacyPaymentMethod) {
-    if (this.target !== 'US') {
-      return this.deletePaymentMean(legacyPaymentMethod);
-    }
-
-    return this.deleteUSPaymentMethod(legacyPaymentMethod);
+    return this.deletePaymentMean(legacyPaymentMethod);
   }
 
   /**
@@ -168,7 +149,9 @@ export default class OvhPaymentMethodLegacy {
     if (this.target === 'US') {
       return this.$q.reject({
         status: 403,
-        message: 'getPaymentMeans is not available for US world part',
+        data: {
+          message: 'getPaymentMeans is not available for US world part',
+        },
       });
     }
 
@@ -194,7 +177,9 @@ export default class OvhPaymentMethodLegacy {
     if (this.target === 'US') {
       return this.$q.reject({
         status: 403,
-        message: 'getPaymentMethodOfType is not available for US world part',
+        data: {
+          message: 'getPaymentMethodOfType is not available for US world part',
+        },
       });
     }
 
@@ -208,12 +193,26 @@ export default class OvhPaymentMethodLegacy {
         paymentMeanIds,
         paymentMeanId => resource.get({
           id: paymentMeanId,
-        }).$promise.then((meanParam) => {
-          const mean = meanParam;
-          mean.paymentType = paymentMeanType;
-          return options.transform
-            ? this.transformPaymentMeanToPaymentMethod(mean)
-            : mean;
+        }).$promise.then((mean) => {
+          let paymentMean;
+          switch (paymentMeanType) {
+            case PAYMENT_MEAN_TYPE_ENUM.BANK_ACCOUNT:
+              paymentMean = new OvhPaymentMeanBankAccount(mean);
+              break;
+            case PAYMENT_MEAN_TYPE_ENUM.CREDIT_CARD:
+              paymentMean = new OvhPaymentMeanCreditCard(mean);
+              break;
+            case PAYMENT_MEAN_TYPE_ENUM.DEFERRED_PAYMENT_ACCOUNT:
+              paymentMean = new OvhPaymentMeanDeferredPaymentAccount(mean);
+              break;
+            case PAYMENT_MEAN_TYPE_ENUM.PAYPAL:
+              paymentMean = new OvhPaymentMeanPaypal(mean);
+              break;
+            default:
+              break;
+          }
+
+          return options.transform ? paymentMean.toPaymentMethod() : paymentMean;
         }),
       )));
   }
@@ -247,7 +246,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   editPaymentMean(paymentMean, params) {
-    return this.getPaymentMeanResource(paymentMean.paymentType)
+    return this.getPaymentMeanResource(paymentMean.meanType)
       .edit({
         id: paymentMean.id,
       }, params).$promise;
@@ -259,7 +258,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   setPaymentMeanAsDefault(paymentMean) {
-    return this.getPaymentMeanResource(paymentMean.paymentType)
+    return this.getPaymentMeanResource(paymentMean.meanType)
       .chooseAsDefaultPaymentMean({
         id: paymentMean.id,
       }, null).$promise;
@@ -271,7 +270,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   deletePaymentMean(paymentMean) {
-    return this.getPaymentMeanResource(paymentMean.paymentType)
+    return this.getPaymentMeanResource(paymentMean.meanType)
       .delete({
         id: paymentMean.id,
       }).$promise;
