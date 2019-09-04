@@ -232,7 +232,7 @@ export default class OvhPaymentMethodService {
     // if original attribute is present, it means that it's an legacy payment method
     if (paymentMethod.original) {
       return this.ovhPaymentMethodLegacy
-        .deletePaymentMethod(paymentMethod.original);
+        .deletePaymentMean(paymentMethod.original);
     }
 
     return this.OvhApiMe.Payment().Method().v6().delete({
