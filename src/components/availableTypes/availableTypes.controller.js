@@ -14,9 +14,10 @@ import {
 
 export default class OvhPaymentMethodAvailableTypesCtrl {
   /* @ngInject */
-  constructor(ovhPaymentMethod) {
+  constructor(ovhPaymentMethod, ovhPaymentMethodHelper) {
     // dependencies injection
     this.ovhPaymentMethod = ovhPaymentMethod;
+    this.ovhPaymentMethodHelper = ovhPaymentMethodHelper;
 
     // other attributes in view
     this.paymentMethodTypes = {
@@ -27,6 +28,24 @@ export default class OvhPaymentMethodAvailableTypesCtrl {
     this.loading = {
       init: false,
     };
+
+    // define model
+    this.model = {};
+    Object.defineProperties(this.model, {
+      $selectedPaymentType: {
+        enumerable: false,
+        writable: true,
+      },
+      selectedPaymentType: {
+        enumerable: true,
+        get: () => this.model.$selectedPaymentType,
+        set: (paymentType) => {
+          console.log('set');
+          this.model.$selectedPaymentType = paymentType;
+          this.onPaymentMethodChange();
+        },
+      },
+    });
   }
 
   /* =============================
@@ -38,10 +57,10 @@ export default class OvhPaymentMethodAvailableTypesCtrl {
     // otherwise the call will be made passing an Object Literal
     // when testing if the callback function is a function ref or not
     if (isFunction(this.onSelectedPaymentTypeChange({
-      paymentType: this.selectedPaymentType,
+      paymentType: this.model.selectedPaymentType,
     }))) {
       // ... invoke it
-      this.onSelectedPaymentTypeChange()(this.selectedPaymentType);
+      this.onSelectedPaymentTypeChange()(this.model.selectedPaymentType);
     }
   }
 
@@ -77,8 +96,8 @@ export default class OvhPaymentMethodAvailableTypesCtrl {
       .getAllAvailablePaymentMethodTypes()
       .then((availableTypesPaymentMethodTypes) => {
         this.paymentMethodTypes.list = availableTypesPaymentMethodTypes.sort((typeA, typeB) => {
-          const typeAIndex = this.paymentTypesOrder.indexOf(typeA.paymentType.value);
-          const typeBIndex = this.paymentTypesOrder.indexOf(typeB.paymentType.value);
+          const typeAIndex = this.paymentTypesOrder.indexOf(typeA.paymentType);
+          const typeBIndex = this.paymentTypesOrder.indexOf(typeB.paymentType);
           return typeAIndex > typeBIndex;
         });
 
@@ -88,7 +107,7 @@ export default class OvhPaymentMethodAvailableTypesCtrl {
             set(
               paymentType,
               'icon.data',
-              get(FALLBACK_IMAGES, paymentType.paymentType.value),
+              get(FALLBACK_IMAGES, paymentType.paymentType),
             );
           }
           return paymentType;
@@ -99,10 +118,8 @@ export default class OvhPaymentMethodAvailableTypesCtrl {
           this.paymentTypesPerLine,
         );
 
-        this.selectedPaymentType = find(this.paymentMethodTypes.list, {
-          paymentType: {
-            value: this.defaultPaymentType,
-          },
+        this.model.selectedPaymentType = find(this.paymentMethodTypes.list, {
+          paymentType: this.defaultPaymentType,
         });
 
         // if it's a function reference ...

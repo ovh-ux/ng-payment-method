@@ -9,7 +9,7 @@ export default {
     defaultPaymentType: '@',
     paymentTypesOrder: '<',
     paymentTypesPerLine: '<',
-    selectedPaymentType: '=',
+    selectedPaymentType: '<',
     onLoaded: '&',
     onLoadError: '&',
     onSelectedPaymentTypeChange: '&',

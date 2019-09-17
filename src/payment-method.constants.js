@@ -3,6 +3,11 @@ export const DEFAULT_OPTIONS = {
   transform: true, // transform legacy payment methods to payment methods
 };
 
+export const DEFAULT_TYPE_OPTIONS = {
+  onlyRegisterable: true,
+  transform: true, // transform legacy payment method types to payment method types
+};
+
 export const IBAN_BIC_RULES = {
   IBAN_FORMAT: {
     FR: [4, 4, 4, 4, 4, 4, 3],
@@ -76,6 +81,7 @@ export const TYPE_INTEGRATION_ENUM = {
 
 export default {
   DEFAULT_OPTIONS,
+  DEFAULT_TYPE_OPTIONS,
   IBAN_BIC_RULES,
   PAYMENT_METHOD_STATUS_ENUM,
   PAYMENT_METHOD_TYPE_ENUM,

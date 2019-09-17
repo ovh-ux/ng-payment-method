@@ -7,7 +7,11 @@ import merge from 'lodash/merge';
 import snakeCase from 'lodash/snakeCase';
 import startCase from 'lodash/startCase';
 
-import { DEFAULT_OPTIONS } from '../payment-method.constants';
+import {
+  DEFAULT_OPTIONS,
+  DEFAULT_TYPE_OPTIONS,
+} from '../payment-method.constants';
+
 import {
   AVAILABLE_PAYMENT_MEANS,
   PAYMENT_MEAN_TYPE_ENUM,
@@ -18,6 +22,7 @@ import OvhPaymentMeanBankAccount from './mean/payment-mean-bank-account.class';
 import OvhPaymentMeanCreditCard from './mean/payment-mean-credit-card.class';
 import OvhPaymentMeanDeferredPaymentAccount from './mean/payment-mean-deferred-payment-account.class';
 import OvhPaymentMeanPaypal from './mean/payment-mean-paypal.class';
+import OvhPaymentMeanType from './mean/payment-mean-type.class';
 
 export default class OvhPaymentMethodLegacy {
   /* @ngInject */
@@ -97,7 +102,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise} That returns an array of available payment means
    *                    transformed to payment method types.
    */
-  getAvailablePaymentMethodTypes() {
+  getAvailablePaymentMethodTypes(options = DEFAULT_TYPE_OPTIONS) {
     const availablePromise = this.$q.when(get(AVAILABLE_PAYMENT_MEANS, this.target));
 
     return this.$q.all({
@@ -109,7 +114,7 @@ export default class OvhPaymentMethodLegacy {
           return false;
         }
 
-        if (!paymentMeanInfos.registerable) {
+        if (options.onlyRegisterable && !paymentMeanInfos.registerable) {
           return false;
         }
 
@@ -118,7 +123,11 @@ export default class OvhPaymentMethodLegacy {
 
       return map(
         registerablePaymentMeans,
-        this.transformLegacyPaymentMethodTypeToPaymentMethodType.bind(this),
+        (meanTypeOptions) => {
+          const meanType = new OvhPaymentMeanType(meanTypeOptions);
+
+          return options.transform ? meanType.toPaymentMethodType() : meanType;
+        },
       );
     });
   }
@@ -341,108 +350,4 @@ export default class OvhPaymentMethodLegacy {
   }
 
   /*= ====  End of US Payment Methods  ====== */
-
-
-  /* =========================================
-   =            Transform Methods            =
-   ========================================= */
-
-  getFullPaymentType(paymentType) {
-    return {
-      value: snakeCase(paymentType).toUpperCase(),
-      text: this.$translate.instant(`ovh_payment_type_${snakeCase(paymentType)}`),
-    };
-  }
-
-  getFullPaymentStatus(paymentStatus, paymentType) {
-    return {
-      value: snakeCase(paymentStatus).toUpperCase(),
-      text: paymentType === 'bankAccount' && paymentStatus === 'pendingValidation'
-        ? this.$translate.instant('ovh_payment_status_waiting_for_documents')
-        : this.$translate.instant(`ovh_payment_status_${snakeCase(paymentStatus)}`),
-    };
-  }
-
-  /**
-   *  Transform payment mean to payment method.
-   *  The goal is to have a coherent object structure between api calls
-   *  (/me/payment/method and /me/paymentMean/*)
-   */
-  transformUSPaymentMethodToPaymentMethod(usPaymentMethod) {
-    const paymentType = get(usPaymentMethod, 'paymentType', null);
-    const paymentStatus = get(usPaymentMethod, 'status', null);
-
-    return {
-      paymentSubType: get(usPaymentMethod, 'paymentSubType', null),
-      icon: {
-        name: null,
-        data: null,
-      },
-      status: this.getFullPaymentStatus(paymentStatus, paymentType),
-      paymentMethodId: usPaymentMethod.id,
-      default: get(usPaymentMethod, 'default', false),
-      description: get(usPaymentMethod, 'description', null),
-      paymentType: this.getFullPaymentType(paymentType),
-      billingContactId: get(usPaymentMethod, 'billingContactId', null),
-      creationDate: get(usPaymentMethod, 'creationDate', null),
-      lastUpdate: null,
-      label: get(usPaymentMethod, 'publicLabel', null),
-      original: usPaymentMethod,
-    };
-  }
-
-  transformPaymentMeanToPaymentMethod(paymentMean) {
-    const paymentType = get(paymentMean, 'paymentType', null);
-    const paymentStatus = get(paymentMean, 'state', null);
-    let paymentLabel;
-
-    switch (paymentType) {
-      case 'paypal':
-        paymentLabel = paymentMean.email;
-        break;
-      case 'creditCard':
-        paymentLabel = paymentMean.number;
-        break;
-      case 'bankAccount':
-        paymentLabel = paymentMean.iban;
-        break;
-      default:
-        paymentLabel = paymentMean.label || null;
-        break;
-    }
-
-    return {
-      paymentSubType: get(paymentMean, 'type', null),
-      icon: {
-        name: null,
-        data: null,
-      },
-      status: this.getFullPaymentStatus(paymentStatus, paymentType),
-      paymentMethodId: paymentMean.id,
-      default: get(paymentMean, 'defaultPaymentMean', false),
-      description: get(paymentMean, 'description', null),
-      paymentType: this.getFullPaymentType(paymentType),
-      billingContactId: null,
-      creationDate: get(paymentMean, 'creationDate', null),
-      lastUpdate: null,
-      label: paymentLabel,
-      expirationDate: get(paymentMean, 'expirationDate', null),
-      original: paymentMean,
-    };
-  }
-
-  transformLegacyPaymentMethodTypeToPaymentMethodType(legacyPaymentMethod) {
-    return {
-      oneshot: true,
-      icon: {
-        name: null,
-        data: null,
-      },
-      registerable: legacyPaymentMethod.registerable,
-      paymentType: this.getFullPaymentType(legacyPaymentMethod.value),
-      original: legacyPaymentMethod,
-    };
-  }
-
-  /* =====  End of Transform Methods  ====== */
 }

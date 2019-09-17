@@ -2,11 +2,10 @@ import snakeCase from 'lodash/snakeCase';
 
 export default class OvhPaymentMean {
   constructor(options = {}) {
-    this.meanType = options.meanType;
-    this.defaultPaymentMean = options.defaultPaymentMean;
-    this.description = options.description;
-    this.state = options.state;
     this.id = options.id;
+    this.state = options.state;
+    this.meanType = options.meanType;
+    this.registrable = options.registrable;
   }
 
   toPaymentMethod() {
