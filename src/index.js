@@ -1,6 +1,7 @@
 import angular from 'angular';
 import 'angular-translate';
 import '@ovh-ux/ng-translate-async-loader';
+import '@ovh-ux/manager-core';
 
 import 'ovh-api-services';
 
@@ -17,14 +18,13 @@ import { PAYMENT_MEAN_STATUS_ENUM } from './legacy/mean/payment-mean.constants';
 
 const moduleName = 'ngOvhPaymentMethod';
 
-console.log(moduleName);
-
 angular
   .module(moduleName, [
     components,
     'ngTranslateAsyncLoader',
     'ovh-api-services',
     'pascalprecht.translate',
+    'ovhManagerCore',
   ])
   .run(/* @ngTranslationsInject ./translations */)
   .constant('OVH_PAYMENT_MEAN_STATUS', PAYMENT_MEAN_STATUS_ENUM)

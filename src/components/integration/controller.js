@@ -1,8 +1,8 @@
 import defaults from 'lodash/defaults';
 import get from 'lodash/get';
-import head from 'lodash/head';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
+import noop from 'lodash/noop';
 import omit from 'lodash/omit';
 import values from 'lodash/values';
 
@@ -11,7 +11,6 @@ import {
 } from './constants';
 
 export default class OvhPaymentMethodIntegrationCtrl {
-
   /* @ngInject */
   constructor($location, $window, ovhPaymentMethod) {
     // dependencies injection
@@ -47,7 +46,7 @@ export default class OvhPaymentMethodIntegrationCtrl {
       hashParamsArray.push(`${hashKey}=${get(hashParams, hashKey)}`);
     });
 
-    let callbackUrlBase = `${location.protocol}//${location.host}${location.pathname}${this.$location.path()}?${hashParamsArray.join('&')}`;
+    const callbackUrlBase = `${location.protocol}//${location.host}${location.pathname}${this.$location.path()}?${hashParamsArray.join('&')}`;
     return {
       cancel: `${callbackUrlBase}${hashParamsArray.length ? '&' : ''}${this.callbackStatusParamUrlName}=cancel`,
       error: `${callbackUrlBase}${hashParamsArray.length ? '&' : ''}${this.callbackStatusParamUrlName}=error`,
@@ -70,7 +69,7 @@ export default class OvhPaymentMethodIntegrationCtrl {
     const callbackFn = get(this, callbackName);
 
     if (!callbackFn) {
-      return;
+      return null;
     }
 
     // if it's a function reference ...
@@ -92,9 +91,9 @@ export default class OvhPaymentMethodIntegrationCtrl {
   =            Callbacks            =
   ================================= */
 
-  onIntegrationInitialized() {
+  onIntegrationInitialized(submitFn = noop) {
     // call onInitialized callback
-    const renderOptions = this.manageCallback('onInitialized');
+    const renderOptions = this.manageCallback('onInitialized', { submitFn });
 
     // reset init loading flag
     this.loading.init = false;
@@ -104,34 +103,39 @@ export default class OvhPaymentMethodIntegrationCtrl {
   }
 
   onIntegrationSubmit() {
-    // call onInitialized callback
-    let postData = this.manageCallback('onSubmit');
+    return new Promise((resolve) => {
+      // call onInitialized callback
+      const onSubmitReturn = this.manageCallback('onSubmit');
 
-    // merge postData with default values if not provided
-    postData = merge({
-      default: false,
-      register: true,
-      callbackUrl: this.buildCallbackUrls(),
-    }, postData);
+      return resolve(onSubmitReturn);
+    }).then((postParams = {}) => {
+      // merge postParams with default values if not provided
 
-    // create payment method by posting to /me/payment/method API route
-    return this.ovhPaymentMethod
-      .addPaymentMethod(this.paymentMethodType, postData)
-      .then((paymentValidation) => {
-        this.paymentValidation = paymentValidation;
+      const postData = merge({
+        default: false,
+        register: true,
+        callbackUrl: this.buildCallbackUrls(),
+      }, postParams);
 
-        // if payment method type doesn't require finalization
-        // call onSubmitSuccess callback
-        if (!this.paymentMethodType.isRequiringFinalization()) {
-          this.manageCallback('onSubmitSuccess', { paymentValidation });
-        }
+      // create payment method by posting to /me/payment/method API route
+      return this.ovhPaymentMethod
+        .addPaymentMethod(this.paymentMethodType, postData)
+        .then((paymentValidation) => {
+          this.paymentValidation = paymentValidation;
 
-        return this.paymentValidation;
-      })
-      .catch((error) => {
-        // in all case (even with finalize required) call onSubmitError callback
-        this.manageCallback('onSubmitError', { error });
-      });
+          // if payment method type doesn't require finalization
+          // call onSubmitSuccess callback
+          if (!this.paymentMethodType.isRequiringFinalization()) {
+            this.manageCallback('onSubmitSuccess', { paymentValidation });
+          }
+
+          return this.paymentValidation;
+        })
+        .catch((error) => {
+          // in all case (even with finalize required) call onSubmitError callback
+          this.manageCallback('onSubmitError', { error });
+        });
+    });
   }
 
   onIntegrationFinalize(finalizeData = {}) {
@@ -170,6 +174,4 @@ export default class OvhPaymentMethodIntegrationCtrl {
   }
 
   /* -----  End of Hooks  ------ */
-
-
-};
+}

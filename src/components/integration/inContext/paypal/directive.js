@@ -25,9 +25,6 @@ export default {
     // define render method to paypal controller
     paypalCtrl.render = (renderOptions = {}) => {
       paypal.Button.render(merge({
-        env: 'production',
-        commit: true,
-        locale: 'fr_FR', // french by default
         payment: paypalCtrl.submit.bind(paypalCtrl),
         onAuthorize: paypalCtrl.onAuthorize.bind(paypalCtrl),
       }, PAYPAL_BUTTON_OPTIONS, renderOptions), tElement[0]);

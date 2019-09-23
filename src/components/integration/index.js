@@ -1,5 +1,6 @@
 import angular from 'angular';
 
+import iframeVantiv from './iframeVantiv';
 import inContext from './inContext';
 import redirect from './redirect';
 
@@ -9,6 +10,7 @@ const moduleName = 'ngOvhPaymentMethodIntegration';
 
 angular
   .module(moduleName, [
+    iframeVantiv,
     inContext,
     redirect,
   ])

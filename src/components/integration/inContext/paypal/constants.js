@@ -1,4 +1,7 @@
 export const PAYPAL_BUTTON_OPTIONS = {
+  env: 'production',
+  commit: true,
+  locale: 'fr_FR', // french by default
   style: {
     color: 'blue',
     label: 'paypal',

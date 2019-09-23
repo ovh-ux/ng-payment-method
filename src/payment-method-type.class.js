@@ -57,7 +57,7 @@ export default class OvhPaymentMethodType {
      */
     this.registerable = options.registerable;
 
-     /**
+    /**
      *  Flag indicating if we can register the payment type and in the same time pay an order.
      *  @type {Boolean}
      */
@@ -79,6 +79,17 @@ export default class OvhPaymentMethodType {
   }
 
   /**
+   *  Determine if payment method type require a billing contact id when creating it.
+   *  This method uses the integration attribute to determine it.
+   *  @return {Boolean} true if type requires a billing contact id false otherwise.
+   */
+  isRequiringContactId() {
+    return [
+      TYPE_INTEGRATION_ENUM.IFRAME_VANTIV,
+    ].includes(this.integration);
+  }
+
+  /**
    *  Determine if payment method type requires finalization.
    *  This method uses the integration attribute to determine it.
    *  @return {Boolean} true if type requires finalization false otherwise.
@@ -89,5 +100,4 @@ export default class OvhPaymentMethodType {
       TYPE_INTEGRATION_ENUM.IN_CONTEXT,
     ].includes(this.integration);
   }
-
-};
+}
