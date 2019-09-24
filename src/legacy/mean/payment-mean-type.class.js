@@ -1,6 +1,6 @@
 import snakeCase from 'lodash/snakeCase';
 
-import OvhPaymentMethodType from '../../payment-method-type.class.js';
+import OvhPaymentMethodType from '../../payment-method-type.class';
 
 export default class OvhPaymentMeanType {
   constructor(options = {}) {

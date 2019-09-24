@@ -4,7 +4,6 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import map from 'lodash/map';
 import merge from 'lodash/merge';
-import snakeCase from 'lodash/snakeCase';
 import startCase from 'lodash/startCase';
 
 import {

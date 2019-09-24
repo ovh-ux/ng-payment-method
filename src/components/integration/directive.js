@@ -19,7 +19,9 @@ export default {
     onSubmitSuccess: '&?',
     paymentMethodType: '<',
   },
-  link: (tScope, tElement, tAttributes, ctrl) => {
+  link: (tScope, tElement, tAttributes, integrationCtrl) => {
+    const ctrl = integrationCtrl;
+
     // declare a DOM element insertion method to controller
     ctrl.insertElement = (tagName, attributes = {}, events = {}, styles = {}, options = {}) => {
       const element = document.createElement(tagName);
