@@ -12,6 +12,7 @@ const name = 'ovhPaymentMethodIntegrationInContextPaypal';
 export default {
   name,
   controller,
+  restrict: 'E',
   bindToController: true,
   controllerAs: '$ctrl',
   require: {

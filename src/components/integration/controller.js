@@ -10,6 +10,10 @@ import {
   DEFAULT_BINDINGS_VALUES,
 } from './constants';
 
+import {
+  TYPE_INTEGRATION_ENUM,
+} from '../../payment-method.constants';
+
 export default class OvhPaymentMethodIntegrationCtrl {
   /* @ngInject */
   constructor($location, $window, ovhPaymentMethod) {
@@ -46,7 +50,7 @@ export default class OvhPaymentMethodIntegrationCtrl {
       hashParamsArray.push(`${hashKey}=${get(hashParams, hashKey)}`);
     });
 
-    const callbackUrlBase = `${location.protocol}//${location.host}${location.pathname}${this.$location.path()}?${hashParamsArray.join('&')}`;
+    const callbackUrlBase = `${location.protocol}//${location.host}${location.pathname}#${this.$location.path()}?${hashParamsArray.join('&')}`;
     return {
       cancel: `${callbackUrlBase}${hashParamsArray.length ? '&' : ''}${this.callbackStatusParamUrlName}=cancel`,
       error: `${callbackUrlBase}${hashParamsArray.length ? '&' : ''}${this.callbackStatusParamUrlName}=error`,
@@ -125,7 +129,8 @@ export default class OvhPaymentMethodIntegrationCtrl {
 
           // if payment method type doesn't require finalization
           // call onSubmitSuccess callback
-          if (!this.paymentMethodType.isRequiringFinalization()) {
+          if (!this.paymentMethodType.isRequiringFinalization()
+            && this.paymentMethodType.integration !== TYPE_INTEGRATION_ENUM.REDIRECT) {
             this.manageCallback('onSubmitSuccess', { paymentValidation });
           }
 

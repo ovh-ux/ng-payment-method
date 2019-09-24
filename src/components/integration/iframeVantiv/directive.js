@@ -11,6 +11,7 @@ const directiveName = 'ovhPaymentMethodIntegrationIframeVantiv';
 
 export default {
   name: directiveName,
+  restrict: 'E',
   require: {
     iframeVantivCtrl: directiveName,
     integrationCtrl: '^ovhPaymentMethodIntegration',
