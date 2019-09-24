@@ -17,7 +17,6 @@ export const THREAT_METRIX = {
   },
 };
 
-
 export const VANTIV_IFRAME_CONFIGURATION = {
   paypageId: 'ThwL3YY9YEnWXTFb',
   style: 'ovhcss',
@@ -85,6 +84,7 @@ export const VANTIV_SCRIPT = {
 };
 
 export default {
+  THREAT_METRIX,
   VANTIV_IFRAME_CONFIGURATION,
   VANTIV_RESPONSE_CODE,
   VANTIV_SCRIPT,
