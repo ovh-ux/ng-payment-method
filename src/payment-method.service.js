@@ -8,7 +8,6 @@ import some from 'lodash/some';
 import {
   DEFAULT_OPTIONS,
   DEFAULT_TYPE_OPTIONS,
-  TYPE_INTEGRATION_ENUM,
 } from './payment-method.constants';
 
 import OvhPaymentMethod from './payment-method.class';
@@ -23,12 +22,6 @@ export default class OvhPaymentMethodService {
     this.$window = $window;
     this.coreConfig = coreConfig;
     this.OvhApiMe = OvhApiMe;
-
-    this.isPaymentMethodTypeRegisterableInContext = OvhPaymentMethodService
-      .isPaymentMethodTypeRegisterableInContext;
-
-    this.isPaymentMethodTypeRequiringContactId = OvhPaymentMethodService
-      .isPaymentMethodTypeRequiringContactId;
 
     this.ovhPaymentMethodLegacy = new OvhPaymentMethodLegacy(
       $q, $translate, $window, OvhApiMe, coreConfig.getRegion(),
@@ -93,18 +86,6 @@ export default class OvhPaymentMethodService {
 
       return [].concat(legacyTypes, paymentMethodTypes);
     });
-  }
-
-  static isPaymentMethodTypeRegisterableInContext(paymentMethodType) {
-    return paymentMethodType && [
-      TYPE_INTEGRATION_ENUM.IFRAME_VANTIV,
-    ].includes(paymentMethodType.integration);
-  }
-
-  static isPaymentMethodTypeRequiringContactId(paymentMethodType) {
-    return paymentMethodType && [
-      TYPE_INTEGRATION_ENUM.IFRAME_VANTIV,
-    ].includes(paymentMethodType.integration);
   }
 
   /* ----------  Action on paymentMethod  ---------- */
