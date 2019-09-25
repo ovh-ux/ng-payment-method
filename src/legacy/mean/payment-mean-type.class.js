@@ -12,6 +12,7 @@ export default class OvhPaymentMeanType {
     return new OvhPaymentMethodType({
       paymentType: snakeCase(this.meanType).toUpperCase(),
       registerable: this.registerable,
+      original: this,
     });
   }
 }

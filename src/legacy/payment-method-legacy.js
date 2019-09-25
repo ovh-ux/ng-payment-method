@@ -3,7 +3,6 @@ import flatten from 'lodash/flatten';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import map from 'lodash/map';
-import merge from 'lodash/merge';
 import startCase from 'lodash/startCase';
 
 import {
@@ -35,18 +34,14 @@ export default class OvhPaymentMethodLegacy {
   }
 
   /**
-   *  [addPaymentMethod description]
-   *  @param {[type]} paymentMethodType   [description]
-   *  @param {[type]} paymentMethodParams [description]
+   *  @deprecated - use addPaymentMean method instead
+   *  Add a legacy payment method
+   *  @param  {Object} paymentMethodType The legacy payment mean to add.
+   *  @param  {Object} paymentMethodParams Add params passed to the POST request.
+   *  @return {Promise}
    */
   addPaymentMethod(paymentMethodType, paymentMethodParams = {}) {
-    if (this.target !== 'US') {
-      return this.addPaymentMean(paymentMethodType, paymentMethodParams);
-    }
-
-    return this.addUSPaymentMethod(merge({
-      paymentType: paymentMethodType,
-    }, paymentMethodParams));
+    return this.addPaymentMean(paymentMethodType, paymentMethodParams);
   }
 
   /**
@@ -225,7 +220,7 @@ export default class OvhPaymentMethodLegacy {
       )));
   }
 
-  addPaymentMean(paymentMeanType, params = {}) {
+  addPaymentMean(paymentMean, params = {}) {
     const addParams = params;
 
     if (has(addParams, 'default')) {
@@ -233,10 +228,10 @@ export default class OvhPaymentMethodLegacy {
       delete addParams.default;
     }
 
-    return this.getPaymentMeanResource(paymentMeanType)
+    return this.getPaymentMeanResource(paymentMean.meanType)
       .save({}, addParams)
       .$promise.then((result) => {
-        if (result.url && paymentMeanType !== 'bankAccount') {
+        if (result.url && paymentMean.meanType !== 'bankAccount') {
           if (!params.returnUrl) {
             this.$window.open(result.url, '_blank');
           } else {

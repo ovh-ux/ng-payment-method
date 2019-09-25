@@ -96,7 +96,7 @@ export default class OvhPaymentMethodService {
   addPaymentMethod(paymentMethodType, params = {}) {
     if (paymentMethodType.isLegacy()) {
       return this.ovhPaymentMethodLegacy
-        .addPaymentMethod(paymentMethodType.original.value, params);
+        .addPaymentMean(paymentMethodType.original, params);
     }
 
     const addParams = params;
