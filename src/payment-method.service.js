@@ -16,7 +16,7 @@ import OvhPaymentMethodType from './payment-method-type.class';
 import OvhPaymentMethodLegacy from './legacy/payment-method-legacy';
 
 export default class OvhPaymentMethodService {
-  constructor($q, $translate, $window, coreConfig, OvhApiMe) {
+  constructor($log, $q, $translate, $window, coreConfig, OvhApiMe) {
     this.$q = $q;
     this.$translate = $translate;
     this.$window = $window;
@@ -24,7 +24,7 @@ export default class OvhPaymentMethodService {
     this.OvhApiMe = OvhApiMe;
 
     this.ovhPaymentMethodLegacy = new OvhPaymentMethodLegacy(
-      $q, $translate, $window, OvhApiMe, coreConfig.getRegion(),
+      $log, $q, $translate, $window, OvhApiMe, coreConfig.getRegion(),
     );
   }
 

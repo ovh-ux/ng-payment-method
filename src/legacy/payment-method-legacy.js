@@ -25,7 +25,8 @@ import OvhPaymentMeanType from './mean/payment-mean-type.class';
 export default class OvhPaymentMethodLegacy {
   /* @ngInject */
 
-  constructor($q, $translate, $window, OvhApiMe, target) {
+  constructor($log, $q, $translate, $window, OvhApiMe, target) {
+    this.$log = $log;
     this.$q = $q;
     this.$translate = $translate;
     this.$window = $window;
@@ -41,6 +42,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   addPaymentMethod(paymentMethodType, paymentMethodParams = {}) {
+    this.$log.warn('[Deprecation warning]: use addPaymentMean method instead of addPaymentMethod');
     return this.addPaymentMean(paymentMethodType, paymentMethodParams);
   }
 
@@ -51,6 +53,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   editPaymentMethod(legacyPaymentMethod, params) {
+    this.$log.warn('[Deprecation warning]: use editPaymentMean method instead of editPaymentMethod');
     return this.editPaymentMean(legacyPaymentMethod, params);
   }
 
@@ -61,6 +64,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   setPaymentMethodAsDefault(legacyPaymentMethod) {
+    this.$log.warn('[Deprecation warning]: use setPaymentMeanAsDefault method instead of setPaymentMethodAsDefault');
     return this.setPaymentMeanAsDefault(legacyPaymentMethod);
   }
 
@@ -87,6 +91,7 @@ export default class OvhPaymentMethodLegacy {
    *  @return {Promise}
    */
   deletePaymentMethod(legacyPaymentMethod) {
+    this.$log.warn('[Deprecation warning]: use deletePaymentMean method instead of deletePaymentMethod');
     return this.deletePaymentMean(legacyPaymentMethod);
   }
 
@@ -305,6 +310,7 @@ export default class OvhPaymentMethodLegacy {
    *  Reject if method is still called before deleting it.
    */
   addUSPaymentMethod() {
+    this.$log.warn('[Deprecation warning]: addUSPaymentMethod method is no longer available');
     return this.$q.reject({
       status: 404,
       data: {
@@ -320,6 +326,7 @@ export default class OvhPaymentMethodLegacy {
    *  Reject if method is still called before deleting it.
    */
   editUSPaymentMethod() {
+    this.$log.warn('[Deprecation warning]: editUSPaymentMethod method is no longer available');
     return this.$q.reject({
       status: 404,
       data: {
@@ -335,6 +342,7 @@ export default class OvhPaymentMethodLegacy {
    *  Reject if method is still called before deleting it.
    */
   deleteUSPaymentMethod() {
+    this.$log.warn('[Deprecation warning]: deleteUSPaymentMethod method is no longer available');
     return this.$q.reject({
       status: 404,
       data: {

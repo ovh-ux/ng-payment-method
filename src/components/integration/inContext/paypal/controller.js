@@ -4,7 +4,6 @@ import merge from 'lodash/merge';
 export default class OvhPaymentMethodIntegrationInContextPaypalCtrl {
   /* @ngInject */
   constructor(TranslateService) {
-    // dependencies injections
     this.TranslateService = TranslateService;
   }
 

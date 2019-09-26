@@ -17,7 +17,6 @@ import {
 export default class OvhPaymentMethodIntegrationCtrl {
   /* @ngInject */
   constructor($location, $window, ovhPaymentMethod) {
-    // dependencies injection
     this.$location = $location;
     this.$window = $window;
     this.ovhPaymentMethod = ovhPaymentMethod;
@@ -45,10 +44,7 @@ export default class OvhPaymentMethodIntegrationCtrl {
     const { location } = this.$window;
     // take all hash param except callbackStatusParamUrlName if present in current location
     const hashParams = omit(this.$location.search(), [this.callbackStatusParamUrlName]);
-    const hashParamsArray = [];
-    Object.keys(hashParams).forEach((hashKey) => {
-      hashParamsArray.push(`${hashKey}=${get(hashParams, hashKey)}`);
-    });
+    const hashParamsArray = Object.keys(hashParams).map(hashKey => `${hashKey}=${get(hashParams, hashKey)}`);
 
     const callbackUrlBase = `${location.protocol}//${location.host}${location.pathname}#${this.$location.path()}?${hashParamsArray.join('&')}`;
     return {

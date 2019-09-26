@@ -26,8 +26,7 @@
                 <img class="payment-method-type-icon"
                      data-ng-if="paymentMethodType.icon.data"
                      data-ng-src="{{ paymentMethodType.icon.data }}"
-                     data-ng-attr-alt="{{ :: paymentMethodType.paymentType.text }}"
-                     alt="" />
+                     data-ng-attr-alt="{{ :: paymentMethodType.paymentType.text }}" />
             </oui-radio>
         </div>
     </div>
@@ -35,7 +34,7 @@
     <!-- Payment method type choice explanation -->
     <div data-ng-transclude="explanationText"></div>
 
-    <!-- set as defautl -->
+    <!-- set as default -->
     <div data-ng-if="$ctrl.showSetAsDefaultChoice">
         <p data-ng-if="$ctrl.registeredPaymentMethods.length === 0"
            data-translate="ovh_payment_method_register_force_as_default">

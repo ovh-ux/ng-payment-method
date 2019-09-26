@@ -1,12 +1,14 @@
 import chunk from 'lodash/chunk';
 import find from 'lodash/find';
 import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
+import has from 'lodash/has';
 import isFunction from 'lodash/isFunction';
 import isNull from 'lodash/isNull';
+import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
 import map from 'lodash/map';
 import set from 'lodash/set';
+import some from 'lodash/some';
 
 import {
   DEFAULT_DISPLAY_PER_LINE,
@@ -18,7 +20,6 @@ import {
 export default class OvhPaymentMethodRegisterCtrl {
   /* @ngInject */
   constructor(ovhPaymentMethod, ovhPaymentMethodHelper) {
-    // dependencies injections
     this.ovhPaymentMethod = ovhPaymentMethod;
     this.ovhPaymentMethodHelper = ovhPaymentMethodHelper;
 
@@ -38,9 +39,8 @@ export default class OvhPaymentMethodRegisterCtrl {
   ====================================== */
 
   initAndCheckDefaultBinding() {
-    // if model is not an empty object throw an exeption
-    if (isNull(this.model) || isUndefined(this.model) || !isEmpty(this.model)) {
-      throw new Error('[ovhPaymentMethodRegister]: model binding must be an empty object');
+    if (isNull(this.model) || isUndefined(this.model) || !isObject(this.model)) {
+      this.model = {};
     }
 
     // set an empty list of registered payment methods if not provided
@@ -107,13 +107,29 @@ export default class OvhPaymentMethodRegisterCtrl {
           this.paymentMethodTypesPerLine,
         );
 
-        // set selected payment method type model
-        this.model.selectedPaymentMethodType = find(this.availablePaymentMethodTypes.list, {
+        const defaultPaymentMethodType = find(this.availablePaymentMethodTypes.list, {
           paymentType: this.defaultPaymentMethodType,
         });
 
+        // set selected payment method type model
+        if (!has(this.model, 'selectedPaymentMethodType')) {
+          this.model.selectedPaymentMethodType = defaultPaymentMethodType;
+        } else if (this.model.selectedPaymentMethodType) {
+          // if the selected payment method type does not exist
+          // set the default one
+          const isModelTypeExists = some(this.availablePaymentMethodTypes.list, {
+            paymentType: get(this.model.selectedPaymentMethodType, 'paymentType'),
+          });
+
+          if (!isModelTypeExists) {
+            this.model.selectedPaymentMethodType = defaultPaymentMethodType;
+          }
+        }
+
         // set default model
-        this.model.setAsDefault = this.registeredPaymentMethods.length === 0;
+        if (!has(this.model, 'setAsDefault')) {
+          this.model.setAsDefault = this.registeredPaymentMethods.length === 0;
+        }
 
         // call onInitialized callback
         // if it's a function reference ...

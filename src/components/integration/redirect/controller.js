@@ -11,7 +11,6 @@ import {
 export default class OvhPaymentMethodIntegrationRedirectCtrl {
   /* @ngInject */
   constructor($location, $window) {
-    // dependencies injections
     this.$location = $location;
     this.$window = $window;
   }
