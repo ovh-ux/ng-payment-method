@@ -16,7 +16,7 @@ export default {
     onInitialized: '&?',
   },
   transclude: {
-    introductionText: '?introductionText',
-    explanationText: '?explanationText',
+    introductionText: '?ovhPaymentMethodRegisterIntroductionText',
+    explanationText: '?ovhPaymentMethodRegisterExplanationText',
   },
 };
