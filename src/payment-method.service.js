@@ -16,6 +16,7 @@ import OvhPaymentMethodType from './payment-method-type.class';
 import OvhPaymentMethodLegacy from './legacy/payment-method-legacy';
 
 export default class OvhPaymentMethodService {
+  /* @ngInject */
   constructor($log, $q, $translate, $window, coreConfig, OvhApiMe) {
     this.$q = $q;
     this.$translate = $translate;
