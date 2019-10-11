@@ -24,7 +24,6 @@ import OvhPaymentMeanType from './mean/payment-mean-type.class';
 
 export default class OvhPaymentMethodLegacy {
   /* @ngInject */
-
   constructor($log, $q, $translate, $window, OvhApiMe, target) {
     this.$log = $log;
     this.$q = $q;

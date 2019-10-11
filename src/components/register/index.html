@@ -20,9 +20,7 @@
                 data-value="paymentMethodType"
                 data-model="$ctrl.model.selectedPaymentMethodType"
                 data-variant="light">
-                <span class="d-block"
-                      data-ng-bind="$ctrl.ovhPaymentMethodHelper.getPaymentMethodTypeText(paymentMethodType)">
-                </span>
+                <div data-ng-bind="$ctrl.ovhPaymentMethodHelper.getPaymentMethodTypeText(paymentMethodType)"></div>
                 <img class="payment-method-type-icon"
                      data-ng-if="paymentMethodType.icon.data"
                      data-ng-src="{{ paymentMethodType.icon.data }}"

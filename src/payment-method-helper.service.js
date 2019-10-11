@@ -4,7 +4,6 @@ import { IBAN_BIC_RULES } from './payment-method.constants';
 
 export default class OvhPaymentMethodHelperService {
   /* @ngInject */
-
   constructor($translate) {
     this.$translate = $translate;
 

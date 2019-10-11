@@ -3,9 +3,8 @@ import find from 'lodash/find';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isFunction from 'lodash/isFunction';
-import isNull from 'lodash/isNull';
+import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
-import isUndefined from 'lodash/isUndefined';
 import map from 'lodash/map';
 import set from 'lodash/set';
 import some from 'lodash/some';
@@ -39,7 +38,7 @@ export default class OvhPaymentMethodRegisterCtrl {
   ====================================== */
 
   initAndCheckDefaultBinding() {
-    if (isNull(this.model) || isUndefined(this.model) || !isObject(this.model)) {
+    if (isNil(this.model) || !isObject(this.model)) {
       this.model = {};
     }
 
